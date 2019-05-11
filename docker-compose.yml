@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  proxy:
+    image: failender/dsa-online-proxy:master
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - /etc/nginx/conf.d/:/etc/nginx/conf.d/    
+  db: 
+    image: mariadb:latest
+    volumes:
+      - db-data:/var/lib/mysql/
+      
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${dbpassword}
+      - MYSQL_DATABASE=dsa
+    
+  frontend:
+    image: failender/dsa-online-frontend:${version}
+
+  backend:
+    image: failender/dsa-online-rest:${version}
+    volumes:
+      - rest-cache:/cache
+
+    environment:
+      - spring.datasource.username=root
+      - spring.datasource.password=${dbpassword}
+      - spring.datasource.url=jdbc:mysql://db:3306/dsa
+      - dsa.online.cache.directory=/cache
+      - dsa.online.scripts.directory=/cache/scripts
+      - dsa.online.backend.version=${version}
+      - dsa.online.frontend.version=${version}
+      - dsa.gruppen.online.adminPassword=${adminPassword}
+      - dsa.gruppen.online.defaultGroup=Der Runde Tisch
+volumes:
+  db-data: {}
+  rest-cache: {}
+  
