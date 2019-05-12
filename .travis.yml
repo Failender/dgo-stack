@@ -6,6 +6,6 @@ jobs:
     - stage: build docker image
       script:
       - docker login -u failender -p $DOCKER_PASS
-      - docker build -t failender/dgo-online-proxy:$TRAVIS_BRANCH .
-      - docker push failender/dgo-online-proxy
+      - docker build -t failender/dgo-proxy:$TRAVIS_BRANCH .
+      - docker push failender/dgo-proxy
 
