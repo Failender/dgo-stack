@@ -2,18 +2,18 @@ version: '3'
 
 services:
   proxy:
+    depends_on:
+      - backend
+      - frontend
     image: failender/dgo-proxy:master
-    ports:
-      - 80:80
-      - 443:443
+
     restart: always
     volumes:
       - /etc/nginx/conf.d/:/etc/nginx/conf.d/    
   db: 
-    image: postgres:11.3
+    image: postgres:12.1
     volumes:
       - db-data:/var/lib/postgresql/data
-      
     ports:
       - 5432:5432
     environment:
@@ -21,15 +21,21 @@ services:
       - POSTGRES_DB=dgo
     
   frontend:
-    image: failender/dgo-frontend:${version}
+    image: failender/dgo-frontend:latest
+    ports:
+      - 80:80
 
   backend:
+    depends_on:
+      - db
     image: failender/dgo-rest:${version}
     volumes:
       - rest-cache:/cache
+    restart_policy::
+      -  never
 
     environment:
-      - hibernate.connection.url=jdbc:postgresql://localhost:5432/dgo?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      - hibernate.connection.url=jdbc:postgresql://db:5432/dgo?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
       - hibernate.connection.username=postgres
       - hibernate.connection.password=${dbpassword}
       - hibernate.initialize.on.start=true
